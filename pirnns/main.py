@@ -117,10 +117,12 @@ def create_coupled_rnn_model(config: dict):
     return model, lightning_module
 
 
-def main(config: dict):
+def main(config: dict, i, alpha):
     # Set global seed - this handles all randomness sources
-    seed_everything(config["seed"], workers=True)
+    seed_everything(config["seed"] + 10*(i+1), workers=True)
     print(f"Global seed set to: {config['seed']}")
+
+    config["alpha"] = alpha
 
     model_type = config.get("model_type", "vanilla").lower()
 
@@ -131,7 +133,7 @@ def main(config: dict):
 
     wandb_logger = WandbLogger(
         project=config["project_name"],
-        name=f"{config['project_name']}_{model_type}_{run_id}",
+        name=f"{config['project_name']}_{model_type}_{alpha}_{run_id}",# remove alpha
         dir=log_dir,
         save_dir=log_dir,
         config=config,
@@ -273,4 +275,8 @@ if __name__ == "__main__":
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    main(config)
+    for i in range(5):
+        main(config, i, 1)
+
+    for i in range(5):
+        main(config, i, .5)
