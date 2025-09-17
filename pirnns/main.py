@@ -94,13 +94,13 @@ def create_multitimescale_rnn_model(config: dict):
     return model, lightning_module
 
 
-def main(config: dict, i, alpha):
+# def main(config: dict, i, alpha):
+def main(config: dict):
 
     # Set global seed - this handles all randomness sources
-    seed_everything(config["seed"] + 10*(i+1), workers=True)
+    seed_everything(config["seed"], workers=True)
     print(f"Global seed set to: {config['seed']}")
 
-    config["alpha"] = alpha
 
     model_type = config.get("model_type", "vanilla").lower()
 
@@ -111,7 +111,7 @@ def main(config: dict, i, alpha):
 
     wandb_logger = WandbLogger(
         project=config["project_name"],
-        name=f"{config['project_name']}_{model_type}_{alpha}_{run_id}",# remove alpha
+        name=f"{config['project_name']}_{model_type}_{run_id}",# remove alpha
         dir=log_dir,
         save_dir=log_dir,
         config=config,
@@ -272,8 +272,33 @@ if __name__ == "__main__":
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    for i in range(5):
-        main(config, i, 1)
+    if "multirun" in config:
+        if config["model_type"] == "vanilla":
+            # Grid for vanilla
+            alphas = [0.1, 0.5, 1]
+            for alpha in alphas:
+                config["alpha"] = alpha
+                for i in range(config["multirun"]):
+                    config["seed"] = i
+                    print(f"Running alphas={config['alpha']}, seed={config['seed']}")
+                    main(config)
 
-    for i in range(5):
-        main(config, i, .5)
+        if "timescales_config" in config:
+            if config["timescales_config"]["type"] == "discrete":
+                # Grid for discrete timescales
+                alpha_values = [[0.25, 0.75], [0.25, 0.5, 0.75, 1]]
+                for alphas in alpha_values:
+                    config["timescales_config"]["values"] = alphas
+                    for i in range(config["multirun"]):
+                        config["seed"] = i
+                        print(f"Running alphas={config['timescales_config']['values']}, seed={config['seed']}")
+                        main(config)
+
+            if config["timescales_config"]["type"] == "continuous":
+                # Grid for continuous
+                for i in range(config["multirun"]):
+                    config["seed"] = i
+                    print(f"Running alphas={config['timescales_config']['distribution']}, seed={config['seed']}")
+                    main(config)
+    else:
+        main(config)

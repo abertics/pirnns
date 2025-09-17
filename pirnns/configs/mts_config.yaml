@@ -1,8 +1,9 @@
 # === Project configuration ===
 project_name: "path-integration-rnn"
 model_type: "multitimescale"
-device: 'cuda:3'
+device: 'cuda:1'
 seed: 0 # Global seed
+# multirun: 3
 
 # === Data (trajectory) configuration ===
 num_trajectories: 100000
@@ -37,16 +38,17 @@ hidden_size: 4096
 activation: "ReLU" #"Tanh"
 
 # Timescales configuration
-# timescales_config:
-#   type: "continuous"
-#   distribution: "powerlaw"
-#   exponent: 2
-#   min_timescale: 0.0434 # corresponds to alpha = 0.9
-#   max_timescale: 2
-
 timescales_config:
-  type: "discrete"
-  values: [0.001, 0.1, 0.2, 0.448, 0.7, 0.9] # corresponds to [1, 0.2] alpha
+  type: "continuous"
+  distribution: "powerlaw"
+  exponent: 2
+  min_timescale: 0.0434 # corresponds to alpha = 0.9
+  max_timescale: 2
+
+# timescales_config:
+#   type: "discrete"
+#   values: [.33, .66]
+  # values: [0.001, 0.1, 0.2, 0.448, 0.7, 0.9] # corresponds to [1, 0.2] alpha
 
 # timescales_config:
 #   type: "continuous"
@@ -60,7 +62,7 @@ learning_rate: 1.0e-4
 weight_decay: 1.0e-4
 step_size: 100
 gamma: 0.5
-max_epochs: 100
+max_epochs: 60 # I'm lazy. 100
 
 # === Callback configs ===
 decode_k: 3
