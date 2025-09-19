@@ -193,6 +193,10 @@ class MultiTimescaleRNN(nn.Module):
 
         return torch.stack(hidden_states, dim=1), torch.stack(outputs, dim=1)
 
+    def initialize_weights(self) -> None:
+        """Initialize weights for stable RNN training. So name is same as rnn.py"""
+        self._initialize_weights()
+
     def _initialize_weights(self) -> None:
         """Initialize weights for stable RNN training"""
         # 1. Input weights (W_in) - Xavier initialization
